@@ -35,8 +35,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("com.github.dwursteisen.minigdx:minigdx:1.0.0-alpha0")
-
+                implementation("com.github.dwursteisen.kotlin-math:kotlin-math:1.0.0-alpha17")
+                implementation("com.github.dwursteisen.minigdx:minigdx:1.0-SNAPSHOT")
+                implementation("com.github.dwursteisen.collada:gltf-api:1.0.0-alpha7")
             }
         }
         val commonTest by getting {
@@ -46,4 +47,18 @@ kotlin {
             }
         }
     }
+}
+
+
+gltfPlugin {
+    create("assetsProtobuf") {
+        this.gltfDirectory.set(project.projectDir.resolve("src/assets/"))
+        this.target.set(project.projectDir.resolve("src/commonMain/resources/"))
+        this.format.set(com.github.dwursteisen.gltf.Format.PROTOBUF)
+    }
+}
+
+project.tasks.create("runJs").apply {
+    group = "minigdx"
+    dependsOn("jsBrowserDevelopmentRun")
 }
