@@ -6,25 +6,28 @@ import com.curiouscreature.kotlin.math.perspective
 import com.curiouscreature.kotlin.math.translation
 import com.dwursteisen.minigdx.scene.api.Scene
 import com.dwursteisen.minigdx.scene.api.camera.PerspectiveCamera
-import com.github.dwursteisen.minigdx.*
-import com.github.dwursteisen.minigdx.ecs.*
+import com.github.dwursteisen.minigdx.GL
+import com.github.dwursteisen.minigdx.Seconds
+import com.github.dwursteisen.minigdx.ecs.Engine
 import com.github.dwursteisen.minigdx.ecs.components.Component
 import com.github.dwursteisen.minigdx.ecs.components.Position
 import com.github.dwursteisen.minigdx.ecs.entities.Entity
 import com.github.dwursteisen.minigdx.ecs.systems.EntityQuery
 import com.github.dwursteisen.minigdx.ecs.systems.System
+import com.github.dwursteisen.minigdx.fileHandler
 import com.github.dwursteisen.minigdx.game.GameSystem
 import com.github.dwursteisen.minigdx.game.Screen
 import com.github.dwursteisen.minigdx.input.Key
+import com.github.dwursteisen.minigdx.inputs
 import com.github.dwursteisen.minigdx.render.Camera
 import com.github.dwursteisen.minigdx.render.MeshPrimitive
-import com.github.dwursteisen.minigdx.render.MeshPrimitiveRenderStage
-import com.github.dwursteisen.minigdx.render.RenderStage
+import kotlin.math.max
+import kotlin.math.min
 
 
-class Player : Component
+class Player(var rotation: Float = 0f) : Component
 class Terrain : Component
-class Bullet(var fired: Boolean = false) : Component
+class Bullet(var fired: Boolean = false, val player: Entity) : Component
 
 @ExperimentalStdlibApi
 class RotationSystem : System(EntityQuery(MeshPrimitive::class)) {
@@ -37,15 +40,35 @@ class RotationSystem : System(EntityQuery(MeshPrimitive::class)) {
 
 class PlayerControl : System(EntityQuery(Player::class)) {
 
+    private fun lerp(a: Float, b: Float, f: Float): Float {
+        return a + f * (b - a)
+    }
+
     override fun update(delta: Seconds, entity: Entity) {
+        entity[Position::class].forEach { position ->
+            position.setRotationZ(0f)
+        }
         if (inputs.isKeyPressed(Key.ARROW_LEFT)) {
             entity[Position::class].forEach {
-                it.transformation *= translation(Float3(50f * delta, 0f, 0f))
+                it.translate(50f * delta)
+            }
+            entity[Player::class].forEach {
+                it.rotation = max(-1f, it.rotation - delta)
             }
         } else if (inputs.isKeyPressed(Key.ARROW_RIGHT)) {
             entity[Position::class].forEach {
-                it.transformation *= translation(Float3(-50f * delta, 0f, 0f))
+                it.translate(-50f * delta)
             }
+            entity[Player::class].forEach {
+                it.rotation = min(1f, it.rotation + delta)
+            }
+            // entity[Player::class].zip(entity[Position::class]) { player, position ->
+//                position.setRotationZ(player.rotation * 70f)
+            //       }
+        }
+        entity[Position::class].zip(entity[Player::class]) { position, player ->
+            position.setRotationZ(player.rotation * 180f)
+            player.rotation = lerp(0f, player.rotation, 0.9f)
         }
     }
 }
@@ -65,21 +88,26 @@ class TerrainMove : System(EntityQuery(Terrain::class)) {
 
 class BulletMove : System(EntityQuery(Bullet::class)) {
 
-    override fun update(delta: Seconds, entity: Entity) {
-        if(inputs.isKeyJustPressed(Key.SPACE)) {
+    override fun update(delta: Seconds) {
+        if (inputs.isKeyJustPressed(Key.SPACE)) {
             entities.filter { it[Bullet::class].any { !it.fired } }.firstOrNull()?.run {
+                val player = this[Bullet::class].first().player
                 this[Position::class].forEach {
-                    it.transformation *= translation(Float3(it.transformation.translation))
+                    it.setTranslate(player[Position::class].first().translation)
                 }
                 this[Bullet::class].forEach {
                     it.fired = true
                 }
             }
         }
+        super.update(delta)
+    }
 
+    override fun update(delta: Seconds, entity: Entity) {
         entity[Position::class].forEach {
-            if (it.transformation.position.z < 200f) {
-                it.transformation *= translation(Float3(0f, 0f, delta * 20f))
+            if (it.transformation.position.z < 100f) {
+                it.translate(z = delta * 120f)
+            } else {
                 entity[Bullet::class].forEach {
                     it.fired = false
                 }
@@ -94,9 +122,10 @@ class SpaceshipScreen : Screen {
     private val spaceship: Scene by fileHandler.get("spaceship.protobuf")
 
     override fun createEntities(engine: Engine) {
+        var playerEntity: Entity? = null
         // Create the player model
         spaceship.models["Player"]?.let { player ->
-            engine.create {
+            playerEntity = engine.create {
                 player.mesh.primitives.forEach { primitive ->
                     add(
                         MeshPrimitive(
@@ -111,17 +140,19 @@ class SpaceshipScreen : Screen {
         }
 
         spaceship.models["Bullet"]?.let { bullet ->
-            engine.create {
-                bullet.mesh.primitives.forEach { primitive ->
-                    add(
-                        MeshPrimitive(
-                            primitive = primitive,
-                            material = spaceship.materials.values.first { it.id == primitive.materialId }
-                        )
-                    )
+            val models = bullet.mesh.primitives.map { primitive ->
+                MeshPrimitive(
+                    primitive = primitive,
+                    material = spaceship.materials.values.first { it.id == primitive.materialId }
+                )
+            }
+            (0..100).forEach { index ->
+                engine.create {
+                    models.forEach { add(it) }
+                    // hack
+                    add(Bullet(player = playerEntity!!))
+                    add(Position(Mat4.fromColumnMajor(*bullet.transformation.matrix)))
                 }
-                add(Bullet())
-                add(Position(Mat4.fromColumnMajor(*bullet.transformation.matrix)))
             }
         }
 
