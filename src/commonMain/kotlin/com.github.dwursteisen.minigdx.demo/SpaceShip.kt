@@ -1,9 +1,6 @@
 package com.github.dwursteisen.minigdx.demo
 
-import com.curiouscreature.kotlin.math.Float3
-import com.curiouscreature.kotlin.math.Mat4
-import com.curiouscreature.kotlin.math.perspective
-import com.curiouscreature.kotlin.math.translation
+import com.curiouscreature.kotlin.math.*
 import com.dwursteisen.minigdx.scene.api.Scene
 import com.dwursteisen.minigdx.scene.api.camera.PerspectiveCamera
 import com.github.dwursteisen.minigdx.GL
@@ -32,7 +29,7 @@ class Bullet(var fired: Boolean = false, val player: Entity) : Component
 @ExperimentalStdlibApi
 class RotationSystem : System(EntityQuery(MeshPrimitive::class)) {
     override fun update(delta: Seconds, entity: Entity) {
-        entity[Position::class].forEach {
+        entity.findAll(Position::class).forEach {
             it.rotateY(10f * delta)
         }
     }
@@ -45,38 +42,26 @@ class PlayerControl : System(EntityQuery(Player::class)) {
     }
 
     override fun update(delta: Seconds, entity: Entity) {
-        entity[Position::class].forEach { position ->
-            position.setRotationZ(0f)
-        }
+        entity.get(Position::class).setRotationZ(0f)
         if (inputs.isKeyPressed(Key.ARROW_LEFT)) {
-            entity[Position::class].forEach {
-                it.translate(50f * delta)
-            }
-            entity[Player::class].forEach {
-                it.rotation = max(-1f, it.rotation - delta)
-            }
+            entity.get(Position::class).translate(50f * delta)
+            val player = entity.get(Player::class)
+            player.rotation = max(-1f, player.rotation - delta)
         } else if (inputs.isKeyPressed(Key.ARROW_RIGHT)) {
-            entity[Position::class].forEach {
-                it.translate(-50f * delta)
-            }
-            entity[Player::class].forEach {
-                it.rotation = min(1f, it.rotation + delta)
-            }
-            // entity[Player::class].zip(entity[Position::class]) { player, position ->
-//                position.setRotationZ(player.rotation * 70f)
-            //       }
+            entity.get(Position::class).translate(-50f * delta)
+            val player = entity.get(Player::class)
+            player.rotation = min(1f, player.rotation + delta)
         }
-        entity[Position::class].zip(entity[Player::class]) { position, player ->
-            position.setRotationZ(player.rotation * 180f)
-            player.rotation = lerp(0f, player.rotation, 0.9f)
-        }
+        val player = entity.get(Player::class)
+        entity.get(Position::class).setRotationZ(player.rotation * 180f)
+        player.rotation = lerp(0f, player.rotation, 0.9f)
     }
 }
 
 class TerrainMove : System(EntityQuery(Terrain::class)) {
 
     override fun update(delta: Seconds, entity: Entity) {
-        entity[Position::class].forEach {
+        entity.findAll(Position::class).forEach {
             it.transformation *= translation(Float3(0f, 0f, delta * -20f))
 
             if (it.transformation.position.z < -20f) {
@@ -90,28 +75,21 @@ class BulletMove : System(EntityQuery(Bullet::class)) {
 
     override fun update(delta: Seconds) {
         if (inputs.isKeyJustPressed(Key.SPACE)) {
-            entities.filter { it[Bullet::class].any { !it.fired } }.firstOrNull()?.run {
-                val player = this[Bullet::class].first().player
-                this[Position::class].forEach {
-                    it.setTranslate(player[Position::class].first().translation)
-                }
-                this[Bullet::class].forEach {
-                    it.fired = true
-                }
+            entities.firstOrNull { !it.get(Bullet::class).fired }?.run {
+                val player = this.get(Bullet::class).player
+                this.get(Position::class).setTranslate(player.get(Position::class).translation)
+                this.get(Bullet::class).fired = true
             }
         }
         super.update(delta)
     }
 
     override fun update(delta: Seconds, entity: Entity) {
-        entity[Position::class].forEach {
-            if (it.transformation.position.z < 100f) {
-                it.translate(z = delta * 120f)
-            } else {
-                entity[Bullet::class].forEach {
-                    it.fired = false
-                }
-            }
+        val position = entity.get(Position::class)
+        if (position.transformation.position.z < 100f) {
+            position.translate(z = delta * 120f)
+        } else {
+            entity.get(Bullet::class).fired = false
         }
     }
 }
