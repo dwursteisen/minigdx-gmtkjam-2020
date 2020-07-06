@@ -62,3 +62,14 @@ project.tasks.create("runJs").apply {
     group = "minigdx"
     dependsOn("jsBrowserDevelopmentRun")
 }
+
+// -- convenient task to create the documentation.
+project.tasks.create<Copy>("docs").apply {
+    group = "minigdx"
+    // package the application
+    dependsOn("jsBrowserProductionWebpack")
+    from("build/distributions/") {
+        include("*.js", "*.protobuf", "*.png", "*.fnt")
+    }
+    into("docs")
+}

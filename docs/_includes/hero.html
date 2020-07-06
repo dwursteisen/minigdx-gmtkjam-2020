@@ -1,0 +1,25 @@
+<!-- begin c-hero -->
+<div class="hero">
+  <div class="container">
+    {% for demo in site.data.settings.demos %}
+    <div class="row">
+      <div class="col col-6 col-t-12 last-item">
+        <div class="hero__content">
+          <h1 class="hero__title">{{ demo.title }}</h1>
+          <p class="hero__subtitle">{{ demo.description }}</p>
+          <div class="hero__social">
+            <span class="hero__social-title">Controls |</span>
+            {{ demo.controls }}
+          </div>
+        </div>
+      </div>
+      <div class="col col-6 col-t-12">
+        <div class="hero__image">
+          <canvas width="500" height="300" demo="{{ demo.key }}">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<!-- end hero -->
