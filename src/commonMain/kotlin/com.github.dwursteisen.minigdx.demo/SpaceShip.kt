@@ -117,7 +117,7 @@ class BulletMove : System(EntityQuery(Bullet::class)) {
 }
 
 @ExperimentalStdlibApi
-class SpaceshipScreen : Screen {
+class SpaceshipScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : Screen {
 
     private val spaceship: Scene by fileHandler.get("spaceship.protobuf")
 
@@ -192,7 +192,7 @@ class SpaceshipScreen : Screen {
                     Camera(
                         projection = perspective(
                             fov = camera.fov,
-                            aspect = 1f, // FIXME,
+                            aspect = screen.width / screen.height.toFloat(),
                             near = camera.near,
                             far = camera.far
                         )
@@ -215,4 +215,4 @@ class SpaceshipScreen : Screen {
 }
 
 @ExperimentalStdlibApi
-class SpaceShip(gl: GL) : GameSystem(gl, SpaceshipScreen())
+class SpaceShip(gl: GL) : GameSystem(gl, SpaceshipScreen(gl.screen))

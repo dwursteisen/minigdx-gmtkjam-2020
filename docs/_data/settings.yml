@@ -1,17 +1,21 @@
 #-------------------------------
 # General Site Settings
-title: Zolan
-logo: logo.svg # You can add own logo.
-description: Zolan is modern minimal theme for Jekyll
+title: Mini-GDX
+# logo: logo.svg # You can add own logo.
+description: Kotlin Multiplatform Gaming framework
 
 
 #-------------------------------
 # Author Settings
 demos:
   - title: Spaceship
-    description: A shooter
-    controls: ⬅ / ➡️ / Space keys
+    description: An infinite shooter.
+    controls: ⬅️ / ➡️ / Space keys
     key: spaceship
+  - title: Camera
+    description: Sample game to check cameras configuration.
+    controls:
+    key: camera
 
 #-------------------------------
 # Contact links

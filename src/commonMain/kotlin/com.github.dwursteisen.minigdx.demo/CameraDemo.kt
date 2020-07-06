@@ -15,7 +15,7 @@ import com.github.dwursteisen.minigdx.render.Camera
 import com.github.dwursteisen.minigdx.render.MeshPrimitive
 
 @ExperimentalStdlibApi
-class CameraScreen : Screen {
+class CameraScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : Screen {
 
     private val spaceship: Scene by fileHandler.get("cameras.protobuf")
 
@@ -40,12 +40,11 @@ class CameraScreen : Screen {
         val (_, _, camera) = spaceship.perspectiveCameras.values.toList()
         camera as PerspectiveCamera
         engine.create {
-            println(camera)
             add(
                 Camera(
                     projection = perspective(
                         fov = camera.fov,
-                        aspect = 1f, // FIXME,
+                        aspect = screen.width / screen.height.toFloat(),
                         near = camera.near,
                         far = camera.far
                     )
@@ -67,4 +66,4 @@ class CameraScreen : Screen {
 }
 
 @ExperimentalStdlibApi
-class CameraDemo(gl: GL) : GameSystem(gl, CameraScreen())
+class CameraDemo(gl: GL) : GameSystem(gl, CameraScreen(gl.screen))
