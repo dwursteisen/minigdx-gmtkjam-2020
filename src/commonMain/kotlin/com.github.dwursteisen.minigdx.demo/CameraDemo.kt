@@ -5,6 +5,7 @@ import com.curiouscreature.kotlin.math.perspective
 import com.dwursteisen.minigdx.scene.api.Scene
 import com.dwursteisen.minigdx.scene.api.camera.PerspectiveCamera
 import com.github.dwursteisen.minigdx.GL
+import com.github.dwursteisen.minigdx.GameContext
 import com.github.dwursteisen.minigdx.ecs.Engine
 import com.github.dwursteisen.minigdx.ecs.components.Position
 import com.github.dwursteisen.minigdx.ecs.systems.System
@@ -15,9 +16,9 @@ import com.github.dwursteisen.minigdx.render.Camera
 import com.github.dwursteisen.minigdx.render.MeshPrimitive
 
 @ExperimentalStdlibApi
-class CameraScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : Screen {
+class CameraScreen(private val gameContext: GameContext) : Screen {
 
-    private val spaceship: Scene by fileHandler.get("cameras.protobuf")
+    private val spaceship: Scene by gameContext.fileHandler.get("cameras.protobuf")
 
     override fun createEntities(engine: Engine) {
         // Create the player model
@@ -44,7 +45,7 @@ class CameraScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : 
                 Camera(
                     projection = perspective(
                         fov = camera.fov,
-                        aspect = screen.width / screen.height.toFloat(),
+                        aspect = gameContext.ratio,
                         near = camera.near,
                         far = camera.far
                     )
@@ -66,4 +67,4 @@ class CameraScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : 
 }
 
 @ExperimentalStdlibApi
-class CameraDemo(gl: GL) : GameSystem(gl, CameraScreen(gl.screen))
+class CameraDemo(gameContext: GameContext) : GameSystem(gameContext, CameraScreen(gameContext))

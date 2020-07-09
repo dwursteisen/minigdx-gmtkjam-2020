@@ -3,19 +3,17 @@ package com.github.dwursteisen.minigdx.demo
 import com.curiouscreature.kotlin.math.*
 import com.dwursteisen.minigdx.scene.api.Scene
 import com.dwursteisen.minigdx.scene.api.camera.PerspectiveCamera
-import com.github.dwursteisen.minigdx.GL
-import com.github.dwursteisen.minigdx.Seconds
+import com.github.dwursteisen.minigdx.*
 import com.github.dwursteisen.minigdx.ecs.Engine
 import com.github.dwursteisen.minigdx.ecs.components.Component
 import com.github.dwursteisen.minigdx.ecs.components.Position
 import com.github.dwursteisen.minigdx.ecs.entities.Entity
 import com.github.dwursteisen.minigdx.ecs.systems.EntityQuery
 import com.github.dwursteisen.minigdx.ecs.systems.System
-import com.github.dwursteisen.minigdx.fileHandler
 import com.github.dwursteisen.minigdx.game.GameSystem
 import com.github.dwursteisen.minigdx.game.Screen
+import com.github.dwursteisen.minigdx.input.InputHandler
 import com.github.dwursteisen.minigdx.input.Key
-import com.github.dwursteisen.minigdx.inputs
 import com.github.dwursteisen.minigdx.render.Camera
 import com.github.dwursteisen.minigdx.render.MeshPrimitive
 import kotlin.math.max
@@ -35,7 +33,7 @@ class RotationSystem : System(EntityQuery(MeshPrimitive::class)) {
     }
 }
 
-class PlayerControl : System(EntityQuery(Player::class)) {
+class PlayerControl(private val inputs: InputHandler) : System(EntityQuery(Player::class)) {
 
     private fun lerp(a: Float, b: Float, f: Float): Float {
         return a + f * (b - a)
@@ -71,7 +69,7 @@ class TerrainMove : System(EntityQuery(Terrain::class)) {
     }
 }
 
-class BulletMove : System(EntityQuery(Bullet::class)) {
+class BulletMove(private val inputs: InputHandler) : System(EntityQuery(Bullet::class)) {
 
     override fun update(delta: Seconds) {
         if (inputs.isKeyJustPressed(Key.SPACE)) {
@@ -95,9 +93,9 @@ class BulletMove : System(EntityQuery(Bullet::class)) {
 }
 
 @ExperimentalStdlibApi
-class SpaceshipScreen(private val screen: com.github.dwursteisen.minigdx.Screen) : Screen {
+class SpaceshipScreen(private val gameContext: GameContext) : Screen {
 
-    private val spaceship: Scene by fileHandler.get("spaceship.protobuf")
+    private val spaceship: Scene by gameContext.fileHandler.get("spaceship.protobuf")
 
     override fun createEntities(engine: Engine) {
         var playerEntity: Entity? = null
@@ -124,7 +122,7 @@ class SpaceshipScreen(private val screen: com.github.dwursteisen.minigdx.Screen)
                     material = spaceship.materials.values.first { it.id == primitive.materialId }
                 )
             }
-            (0..100).forEach { index ->
+            (0..100).forEach { _ ->
                 engine.create {
                     models.forEach { add(it) }
                     // hack
@@ -170,7 +168,7 @@ class SpaceshipScreen(private val screen: com.github.dwursteisen.minigdx.Screen)
                     Camera(
                         projection = perspective(
                             fov = camera.fov,
-                            aspect = screen.width / screen.height.toFloat(),
+                            aspect = gameContext.ratio,
                             near = camera.near,
                             far = camera.far
                         )
@@ -188,9 +186,13 @@ class SpaceshipScreen(private val screen: com.github.dwursteisen.minigdx.Screen)
     }
 
     override fun createSystems(): List<System> {
-        return listOf(PlayerControl(), TerrainMove(), BulletMove())
+        return listOf(
+            PlayerControl(gameContext.input),
+            TerrainMove(),
+            BulletMove(gameContext.input)
+        )
     }
 }
 
 @ExperimentalStdlibApi
-class SpaceShip(gl: GL) : GameSystem(gl, SpaceshipScreen(gl.screen))
+class SpaceShip(gameContext: GameContext) : GameSystem(gameContext, SpaceshipScreen(gameContext))

@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.3.70"
-    id("com.github.dwursteisen.gltf") version "1.0.0-alpha7"
+    id("com.github.dwursteisen.gltf") version "1.0.0-alpha8"
 }
 
 group = "org.example"
@@ -35,9 +35,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("com.github.dwursteisen.kotlin-math:kotlin-math:1.0.0-alpha17")
+                implementation("com.github.dwursteisen.kotlin-math:kotlin-math:1.0.0-alpha18")
                 implementation("com.github.dwursteisen.minigdx:minigdx:1.0-SNAPSHOT")
-                implementation("com.github.dwursteisen.collada:gltf-api:1.0.0-alpha7")
+                implementation("com.github.dwursteisen.gltf:gltf-api:1.0.0-alpha8")
             }
         }
         val commonTest by getting {

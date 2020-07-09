@@ -12,6 +12,10 @@ demos:
     description: An infinite shooter.
     controls: ⬅️ / ➡️ / Space keys
     key: spaceship
+  - title: Animation
+    description: Animation using a set of joints
+    controls:
+    key: animation
   - title: Camera
     description: Sample game to check cameras configuration.
     controls:
