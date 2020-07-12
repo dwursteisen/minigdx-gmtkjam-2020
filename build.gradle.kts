@@ -3,7 +3,7 @@ plugins {
     id("com.github.dwursteisen.gltf") version "1.0.0-alpha8"
 }
 
-group = "org.example"
+group = "com.github.dwursteisen.gmtkjam"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -36,7 +36,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("com.github.dwursteisen.kotlin-math:kotlin-math:1.0.0-alpha18")
-                implementation("com.github.dwursteisen.minigdx:minigdx:1.0-SNAPSHOT")
+                implementation("com.github.dwursteisen.minigdx:minigdx:1.1-SNAPSHOT")
                 implementation("com.github.dwursteisen.gltf:gltf-api:1.0.0-alpha8")
             }
         }
@@ -64,12 +64,8 @@ project.tasks.create("runJs").apply {
 }
 
 // -- convenient task to create the documentation.
-project.tasks.create<Copy>("docs").apply {
+project.tasks.create("dist").apply {
     group = "minigdx"
     // package the application
     dependsOn("jsBrowserProductionWebpack")
-    from("build/distributions/") {
-        include("*.js", "*.protobuf", "*.png", "*.fnt")
-    }
-    into("docs")
 }

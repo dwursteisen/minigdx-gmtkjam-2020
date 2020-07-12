@@ -11,8 +11,8 @@
             margin-left: auto;
             margin-right: auto;
             display: block;
-            width: 1600px;
-            height: 900px;
+            width: 1280px;
+            height: 720px;
         }
 
         body {
@@ -39,7 +39,7 @@
             margin: 1px;
         }
 
-        table, td {
+        li {
             text-align: left;
         }
 
@@ -52,26 +52,18 @@
     </style>
 </head>
 <body>
-<h1>MiniGDX Tech demo</h1>
+<h1>GMTK Jam - MiniGDX Tech demo</h1>
 <div class="row">
     <div class="column">
-        <h3>Spaceship</h3>
-        <canvas width="1600" height="900" demo="spaceship"></canvas>
+        <h3>Out Of Control</h3>
+        <canvas width="1280" height="720"></canvas>
+        <ul>
+            <li>Move: LEFT / RIGHT / UP / DOWN arrows</li>
+            <li>Reset the level: Push R</li>
+            <li>Reach the flag. <strong>BUT</strong> the key mapping change for each turn.</li>
+        </ul>
     </div>
 </div>
-<div class="row">
-    <div class="column">
-        <h3>Animation</h3>
-        <canvas width="1600" height="900" demo="animation"></canvas>
-    </div>
-</div>
-<div class="row">
-    <div class="column">
-        <h3>Camera</h3>
-        <canvas width="1600" height="900" demo="camera"></canvas>
-    </div>
-</div>
-
 </body>
 <script src="minigdx-demo.js"></script>
 </html>
