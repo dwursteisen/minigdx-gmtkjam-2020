@@ -22,6 +22,10 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
 
     class Idle(val system: PlayerSystem) : State() {
 
+        override fun onEnter(entity: Entity) {
+            entity.get(Player::class).lane = 0
+        }
+
         override fun update(delta: Seconds, entity: Entity): State? {
             val translation = entity.get(Origin::class).origin.translation
             val position = entity.get(Position::class).translation
@@ -33,8 +37,8 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
                 }
             } else {
                 entity.get(Position::class).setTranslate(
-                    x = lerp(origin.x, position.x),
-                    z = lerp(origin.z, position.z)
+                    x = lerp(origin.x, position.x, deltaTime = delta, step = 0.95f),
+                    z = lerp(origin.z, position.z, deltaTime = delta, step = 0.95f)
                 )
             }
 
@@ -45,7 +49,7 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
     class Run(val system: PlayerSystem) : State() {
         override fun onEnter(entity: Entity) {
             emitEvents(StartRunning())
-            println("RUN")
+            entity.get(Player::class).lane = 0
             super.onEnter(entity)
         }
 
@@ -56,9 +60,9 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
                 }
             }
 
-            if (system.inputHandler.isKeyJustPressed(Key.ARROW_RIGHT)) {
+            if (system.inputHandler.isKeyJustPressed(Key.ARROW_LEFT)) {
                 entity.get(Player::class).lane = max(-3, entity.get(Player::class).lane - 1)
-            } else if (system.inputHandler.isKeyJustPressed(Key.ARROW_LEFT)) {
+            } else if (system.inputHandler.isKeyJustPressed(Key.ARROW_RIGHT)) {
                 entity.get(Player::class).lane = min(3, entity.get(Player::class).lane + 1)
             }
 
@@ -68,14 +72,13 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
 
             val lane = entity.get(Player::class).lane.toFloat()
             entity.get(Position::class).setTranslate(
-                x = lerp(origin.x + lane, position.x),
-                z = lerp(origin.z, position.z)
+                x = lerp(origin.x + lane, position.x, step = 0.70f),
+                z = lerp(origin.z, position.z, step = 0.70f)
             )
             return null
         }
 
         override fun onExit(entity: Entity) {
-            println("STOP RUN")
             emitEvents(StopRunning())
         }
     }
