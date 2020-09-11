@@ -21,7 +21,7 @@ class GroundSystem : StateMachineSystem(Ground::class) {
             val translation = entity.get(Origin::class).origin.translation
             val position = entity.get(Position::class).translation
             val origin = Vector3(translation.x, translation.y, translation.z)
-            entity.get(Position::class).translate(
+            entity.get(Position::class).setTranslate(
                 x = lerp(origin.x, position.x),
                 z = lerp(origin.z, position.z)
             )
@@ -32,13 +32,13 @@ class GroundSystem : StateMachineSystem(Ground::class) {
     class Run(val system: GroundSystem) : State() {
 
         override fun configure() {
-            onEvent(StartRunning::class) {
+            onEvent(StopRunning::class) {
                 Idle(system)
             }
         }
 
         override fun update(delta: Seconds, entity: Entity): State? {
-            entity.get(Position::class).translate(y = 1f * delta)
+            entity.get(Position::class).translate(z = 5f * delta)
             return null
         }
     }

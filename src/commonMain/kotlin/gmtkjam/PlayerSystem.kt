@@ -32,7 +32,7 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
                     return Run(system)
                 }
             } else {
-                entity.get(Position::class).translate(
+                entity.get(Position::class).setTranslate(
                     x = lerp(origin.x, position.x),
                     z = lerp(origin.z, position.z)
                 )
@@ -45,6 +45,7 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
     class Run(val system: PlayerSystem) : State() {
         override fun onEnter(entity: Entity) {
             emitEvents(StartRunning())
+            println("RUN")
             super.onEnter(entity)
         }
 
@@ -55,9 +56,9 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
                 }
             }
 
-            if (system.inputHandler.isKeyJustPressed(Key.ARROW_LEFT)) {
+            if (system.inputHandler.isKeyJustPressed(Key.ARROW_RIGHT)) {
                 entity.get(Player::class).lane = max(-3, entity.get(Player::class).lane - 1)
-            } else if (system.inputHandler.isKeyJustPressed(Key.ARROW_RIGHT)) {
+            } else if (system.inputHandler.isKeyJustPressed(Key.ARROW_LEFT)) {
                 entity.get(Player::class).lane = min(3, entity.get(Player::class).lane + 1)
             }
 
@@ -66,7 +67,7 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
             val origin = Vector3(translation.x, translation.y, translation.z)
 
             val lane = entity.get(Player::class).lane.toFloat()
-            entity.get(Position::class).translate(
+            entity.get(Position::class).setTranslate(
                 x = lerp(origin.x + lane, position.x),
                 z = lerp(origin.z, position.z)
             )
@@ -74,6 +75,7 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
         }
 
         override fun onExit(entity: Entity) {
+            println("STOP RUN")
             emitEvents(StopRunning())
         }
     }

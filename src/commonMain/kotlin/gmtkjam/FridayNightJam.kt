@@ -1,9 +1,11 @@
 package gmtkjam
 
 import com.dwursteisen.minigdx.scene.api.Scene
+import com.dwursteisen.minigdx.scene.api.model.Box
 import com.github.dwursteisen.minigdx.GameContext
 import com.github.dwursteisen.minigdx.api.toMat4
 import com.github.dwursteisen.minigdx.ecs.Engine
+import com.github.dwursteisen.minigdx.ecs.components.gl.BoundingBox
 import com.github.dwursteisen.minigdx.ecs.createFromNode
 import com.github.dwursteisen.minigdx.ecs.systems.System
 import com.github.dwursteisen.minigdx.game.Screen
@@ -23,7 +25,7 @@ class FridayNightJam(override val gameContext: GameContext) : Screen {
             if (it.name == "player") {
                 log.info("CREATE_ENTITIES") { "Create Player" }
                 entity.add(Player())
-            } else if (it.name.startsWith("Pic")) {
+            } else if (it.name.startsWith("pic")) {
                 log.info("CREATE_ENTITIES") { "Create Pic" }
                 entity.add(Pic())
                 entity.add(Ground())
@@ -37,7 +39,8 @@ class FridayNightJam(override val gameContext: GameContext) : Screen {
 
     override fun createSystems(engine: Engine): List<System> {
         return listOf(
-            PlayerSystem(gameContext.input)
+            PlayerSystem(gameContext.input),
+            GroundSystem()
         ) + super.createSystems(engine)
     }
 }
