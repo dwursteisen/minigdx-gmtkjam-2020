@@ -2,6 +2,7 @@ package com.github.dwursteisen.minigdx.demo
 
 import com.github.dwursteisen.minigdx.GLConfiguration
 import com.github.dwursteisen.minigdx.GameContext
+import com.github.dwursteisen.minigdx.Percent
 import com.github.dwursteisen.minigdx.configuration
 import com.github.dwursteisen.minigdx.game.GameSystem
 import gmtkjam.FridayNightJam
@@ -14,6 +15,23 @@ import kotlin.browser.window
 @ExperimentalStdlibApi
 class FridayNightJamGame(gameContext: GameContext) : GameSystem(gameContext, FridayNightJam(gameContext))
 
+
+val loadingProgress = { progress: Percent ->
+    println(progress)
+    val percent = progress.toFloat()
+    val tag = document.getElementById("loading")
+    val result = if(percent < 0.25f) {
+        "\uD83C\uDD7E\uD83C\uDD7E\uD83C\uDD7E\uD83C\uDD7E"
+    } else if(percent < 0.5f) {
+        "\uD83C\uDD7E\uD83C\uDD7E❇️❇️"
+    } else if(percent < 0.75f) {
+        "\uD83C\uDD7E❇️❇️❇️"
+    } else {
+        "❇️❇️❇️❇️"
+    }
+    tag?.textContent = result
+}
+
 @ExperimentalStdlibApi
 fun main() {
     val canvas = document.getElementsByTagName("canvas")[0]!!
@@ -24,7 +42,8 @@ fun main() {
         canvas = canvas as HTMLCanvasElement,
         rootPath = rootPath,
         debug = true,
-        gameName = "Friday Night"
+        gameName = "Friday Night",
+        loadingListener = loadingProgress
     )
     ).execute { FridayNightJamGame(it) }
 }

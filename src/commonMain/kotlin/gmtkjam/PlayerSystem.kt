@@ -3,6 +3,7 @@ package gmtkjam
 import com.github.dwursteisen.minigdx.Seconds
 import com.github.dwursteisen.minigdx.ecs.components.Position
 import com.github.dwursteisen.minigdx.ecs.entities.Entity
+import com.github.dwursteisen.minigdx.ecs.entities.position
 import com.github.dwursteisen.minigdx.ecs.physics.AABBCollisionResolver
 import com.github.dwursteisen.minigdx.ecs.states.State
 import com.github.dwursteisen.minigdx.ecs.systems.EntityQuery
@@ -67,11 +68,11 @@ class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::
             }
 
             val translation = entity.get(Origin::class).origin.translation
-            val position = entity.get(Position::class).translation
+            val position = entity.position.translation
             val origin = Vector3(translation.x, translation.y, translation.z)
 
             val lane = entity.get(Player::class).lane.toFloat()
-            entity.get(Position::class).setTranslate(
+            entity.position.setTranslate(
                 x = lerp(origin.x + lane, position.x, step = 0.70f),
                 z = lerp(origin.z, position.z, step = 0.70f)
             )
