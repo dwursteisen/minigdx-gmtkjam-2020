@@ -43,6 +43,7 @@ class FridayNightJam(override val gameContext: GameContext) : Screen {
     override fun createSystems(engine: Engine): List<System> {
         return listOf(
             PlayerSystem(gameContext, scene, engine, gameContext.input, shot),
+            ShotSystem(),
             AsteroidSystem(gameContext, scene, engine, asteroids),
             MoveSystem()
         ) + super.createSystems(engine)

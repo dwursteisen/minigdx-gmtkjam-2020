@@ -5,9 +5,6 @@ import com.dwursteisen.minigdx.scene.api.relation.Node
 import com.github.dwursteisen.minigdx.GameContext
 import com.github.dwursteisen.minigdx.Seconds
 import com.github.dwursteisen.minigdx.ecs.Engine
-import com.github.dwursteisen.minigdx.ecs.components.Position
-import com.github.dwursteisen.minigdx.ecs.components.gl.BoundingBox
-import com.github.dwursteisen.minigdx.ecs.components.gl.MeshPrimitive
 import com.github.dwursteisen.minigdx.ecs.createFromNode
 import com.github.dwursteisen.minigdx.ecs.entities.Entity
 import com.github.dwursteisen.minigdx.ecs.entities.position
@@ -26,6 +23,8 @@ class AsteroidSystem(
 
     private val shots: List<Entity> by interested(EntityQuery(Shot::class))
 
+    private val players by interested(EntityQuery((Player::class)))
+
     private val collider = AABBCollisionResolver()
 
     @ExperimentalStdlibApi
@@ -34,7 +33,7 @@ class AsteroidSystem(
             val asteroid = engine.createFromNode(asteroids.random(), gameContext, scene)
             asteroid.position.setGlobalTranslation(
                 x = Random.nextFloat() * 24f - 12f,
-                y = Random.nextFloat() * 24f - 12f
+                z = Random.nextFloat() * 24f - 12f
             )
             asteroid.add(Asteroid())
             asteroid.add(Offscreen(speed = 5f, rotation = Random.nextFloat() * 360f))
@@ -49,7 +48,6 @@ class AsteroidSystem(
 
         shots.filter { collider.collide(it, entity) }
             .forEach { shot ->
-                println("collide")
                 if (entity.asteroid.size > 0) {
                     createNewAsteroid(entity)
                     createNewAsteroid(entity)
@@ -57,6 +55,10 @@ class AsteroidSystem(
                 shot.destroy()
                 entity.destroy()
             }
+
+        if (players.any { collider.collide(it, entity) }) {
+            println("You loose")
+        }
     }
 
     @ExperimentalStdlibApi
@@ -70,10 +72,10 @@ class AsteroidSystem(
 
     companion object {
         private val SCALES = arrayOf(
-            Vector3(0f, 0f, 0f),
-            Vector3(0.25f, 0.25f, 0.25f),
+            Vector3(0.75f, 0.75f, 0.75f),
             Vector3(0.5f, 0.5f, 0.5f),
-            Vector3(1f, 1f, 1f)
+            Vector3(0.25f, 0.25f, 0.25f),
+            Vector3(0.25f, 0.25f, 0.25f)
         )
     }
 }

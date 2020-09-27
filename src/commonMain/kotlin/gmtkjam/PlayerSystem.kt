@@ -31,7 +31,7 @@ class PlayerSystem(
         if (input.isKeyPressed(Key.SPACE) && coolDown <= 0f) {
             // create new shot
             // direction = rotation z of the model !
-            coolDown = 0.2f
+            coolDown = 0.05f
             val node = shot.random()
             val newShot = engine.createFromNode(node, gameContext, scene)
             newShot.add(Offscreen())
@@ -39,8 +39,7 @@ class PlayerSystem(
             newShot.position.setGlobalTranslation(entity.position.translation)
             newShot.position.setLocalRotation(x = 0f, y = entity.get(Player::class).rotation, z = 0f)
             newShot.offscreen.rotation = entity.get(Player::class).rotation
-            newShot.offscreen.speed = 10f
-            println(newShot.componentsType)
+            newShot.offscreen.speed = 15f
         }
 
         if (input.isKeyPressed(Key.ARROW_UP)) {
