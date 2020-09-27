@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.3.70"
-    id("com.github.dwursteisen.gltf") version "1.0.0-alpha10"
+    id("com.github.dwursteisen.gltf") version "1.0-SNAPSHOT"
 }
 
 group = "com.github.dwursteisen.gmtkjam"
@@ -37,7 +37,7 @@ kotlin {
                 implementation(kotlin("stdlib-common"))
                 implementation("com.github.dwursteisen.kotlin-math:kotlin-math:1.0.0-alpha18")
                 implementation("com.github.dwursteisen.minigdx:minigdx:1.2-SNAPSHOT")
-                implementation("com.github.dwursteisen.gltf:gltf-api:1.0.0-alpha10")
+                implementation("com.github.dwursteisen.gltf:gltf-api:1.0-SNAPSHOT")
             }
         }
         val commonTest by getting {

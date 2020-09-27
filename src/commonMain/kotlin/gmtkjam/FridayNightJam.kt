@@ -1,8 +1,8 @@
 package gmtkjam
 
 import com.dwursteisen.minigdx.scene.api.Scene
+import com.dwursteisen.minigdx.scene.api.relation.Node
 import com.github.dwursteisen.minigdx.GameContext
-import com.github.dwursteisen.minigdx.api.toMat4
 import com.github.dwursteisen.minigdx.ecs.Engine
 import com.github.dwursteisen.minigdx.ecs.createFromNode
 import com.github.dwursteisen.minigdx.ecs.systems.System
@@ -12,36 +12,39 @@ import com.github.dwursteisen.minigdx.game.Screen
 @ExperimentalStdlibApi
 class FridayNightJam(override val gameContext: GameContext) : Screen {
 
-    private val scene: Scene by gameContext.fileHandler.get("assets.protobuf")
+    private val scene: Scene by gameContext.fileHandler.get("asteroid.protobuf")
 
     private val log = gameContext.logger
+
+    private val asteroids = mutableListOf<Node>()
+    private val shot = mutableListOf<Node>()
 
     override fun createEntities(engine: Engine) {
         log.info("CREATE_ENTITIES") { "Create Entities" }
         scene.children.forEach {
-            val entity = engine.createFromNode(it, gameContext, scene)
             if (it.name == "player") {
+                val entity = engine.createFromNode(it, gameContext, scene)
                 log.info("CREATE_ENTITIES") { "Create Player" }
                 entity.add(Player())
-            } else if (it.name.startsWith("pic")) {
-                log.info("CREATE_ENTITIES") { "Create Pic" }
-                entity.add(Pic())
-                entity.add(Ground())
-            } else if (it.name == "end") {
-                log.info("CREATE_ENTITIES") { "Create Ending pannel" }
-                entity.add(Ground())
-            } else if (!it.name.startsWith("Camera")) {
-                log.info("CREATE_ENTITIES") { "Create Ground" }
-                entity.add(Ground())
+                entity.add(Offscreen())
+            } else if (it.name.startsWith("asteroid")) {
+                log.info("CREATE_ENTITIES") { "Create Asteroid" }
+                asteroids.add(it)
+            } else if (it.name == "shot") {
+                log.info("CREATE_ENTITIES") { "Saving shot Node" }
+                shot.add(it)
+            } else {
+                // Create cameras ...
+                engine.createFromNode(it, gameContext, scene)
             }
-            entity.add(Origin(it.transformation.toMat4()))
         }
     }
 
     override fun createSystems(engine: Engine): List<System> {
         return listOf(
-            PlayerSystem(gameContext.input),
-            GroundSystem()
+            PlayerSystem(gameContext, scene, engine, gameContext.input, shot),
+            AsteroidSystem(gameContext, scene, engine, asteroids),
+            MoveSystem()
         ) + super.createSystems(engine)
     }
 }

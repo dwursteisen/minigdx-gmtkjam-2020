@@ -1,13 +1,36 @@
 package gmtkjam
 
-import com.curiouscreature.kotlin.math.Mat4
+import com.curiouscreature.kotlin.math.Degrees
+import com.github.dwursteisen.minigdx.Seconds
 import com.github.dwursteisen.minigdx.ecs.components.Component
-import com.github.dwursteisen.minigdx.ecs.components.StateMachineComponent
+import com.github.dwursteisen.minigdx.ecs.entities.Entity
 
-class Player(var lane: Int = 0) : StateMachineComponent()
+class Player(var rotation: Degrees = 0f) : Component
 
-class Pic : Component
+class Asteroid(
+    var size: Int = 3
+) : Component
 
-class Origin(var origin: Mat4) : Component
+class Offscreen(
+    var speed: Float = 0f,
+    var rotation: Degrees = 0f
+) : Component
 
-class Ground : StateMachineComponent()
+class Shot(
+    var ttl: Seconds = 2f
+) : Component
+
+val Entity.offscreen
+    get(): Offscreen {
+        return this.get(Offscreen::class)
+    }
+
+val Entity.shot
+    get() : Shot {
+        return this.get(Shot::class)
+    }
+
+val Entity.asteroid
+    get() : Asteroid {
+        return this.get(Asteroid::class)
+    }

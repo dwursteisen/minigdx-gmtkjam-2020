@@ -1,90 +1,69 @@
 package gmtkjam
 
+import com.dwursteisen.minigdx.scene.api.Scene
+import com.dwursteisen.minigdx.scene.api.relation.Node
+import com.github.dwursteisen.minigdx.GameContext
 import com.github.dwursteisen.minigdx.Seconds
-import com.github.dwursteisen.minigdx.ecs.components.Position
+import com.github.dwursteisen.minigdx.ecs.Engine
+import com.github.dwursteisen.minigdx.ecs.createFromNode
 import com.github.dwursteisen.minigdx.ecs.entities.Entity
 import com.github.dwursteisen.minigdx.ecs.entities.position
-import com.github.dwursteisen.minigdx.ecs.physics.AABBCollisionResolver
-import com.github.dwursteisen.minigdx.ecs.states.State
 import com.github.dwursteisen.minigdx.ecs.systems.EntityQuery
-import com.github.dwursteisen.minigdx.ecs.systems.StateMachineSystem
+import com.github.dwursteisen.minigdx.ecs.systems.System
 import com.github.dwursteisen.minigdx.input.InputHandler
 import com.github.dwursteisen.minigdx.input.Key
-import com.github.dwursteisen.minigdx.math.Vector3
-import com.github.dwursteisen.minigdx.math.lerp
-import kotlin.math.max
-import kotlin.math.min
 
-class PlayerSystem(val inputHandler: InputHandler) : StateMachineSystem(Player::class) {
+class PlayerSystem(
+    private val gameContext: GameContext,
+    private val scene: Scene,
+    private val engine: Engine,
+    private val input: InputHandler,
+    private val shot: List<Node>
+) : System(EntityQuery(Player::class)) {
 
-    private val pics by interested(EntityQuery(Pic::class))
+    private var coolDown = 0f
 
-    private val collider: AABBCollisionResolver = AABBCollisionResolver()
-
-    class Idle(val system: PlayerSystem) : State() {
-
-        override fun onEnter(entity: Entity) {
-            entity.get(Player::class).lane = 0
+    @ExperimentalStdlibApi
+    override fun update(delta: Seconds, entity: Entity) {
+        if (coolDown > 0f) {
+            coolDown -= delta
+        }
+        if (input.isKeyPressed(Key.SPACE) && coolDown <= 0f) {
+            // create new shot
+            // direction = rotation z of the model !
+            coolDown = 0.2f
+            val node = shot.random()
+            val newShot = engine.createFromNode(node, gameContext, scene)
+            newShot.add(Offscreen())
+            newShot.add(Shot())
+            newShot.position.setGlobalTranslation(entity.position.translation)
+            newShot.position.setLocalRotation(x = 0f, y = entity.get(Player::class).rotation, z = 0f)
+            newShot.offscreen.rotation = entity.get(Player::class).rotation
+            newShot.offscreen.speed = 10f
+            println(newShot.componentsType)
         }
 
-        override fun update(delta: Seconds, entity: Entity): State? {
-            val translation = entity.get(Origin::class).origin.translation
-            val position = entity.get(Position::class).translation
-            val origin = Vector3(translation.x, translation.y, translation.z)
-            if (origin.dist(position) < 2f) {
-
-                if (system.inputHandler.isKeyJustPressed(Key.SPACE)) {
-                    return Run(system)
-                }
-            } else {
-                entity.get(Position::class).setTranslate(
-                    x = lerp(origin.x, position.x, deltaTime = delta, step = 0.95f),
-                    z = lerp(origin.z, position.z, deltaTime = delta, step = 0.95f)
-                )
-            }
-
-            return null
-        }
-    }
-
-    class Run(val system: PlayerSystem) : State() {
-        override fun onEnter(entity: Entity) {
-            emitEvents(StartRunning())
-            entity.get(Player::class).lane = 0
-            super.onEnter(entity)
+        if (input.isKeyPressed(Key.ARROW_UP)) {
+            val offscreen = entity.offscreen
+            offscreen.speed += 10f * delta
+            offscreen.speed = minOf(offscreen.speed, 50f)
+            offscreen.rotation = entity.position.rotation.y
         }
 
-        override fun update(delta: Seconds, entity: Entity): State? {
-            system.pics.forEach {
-                if (system.collider.collide(entity, it)) {
-                    return Idle(system)
-                }
-            }
 
-            if (system.inputHandler.isKeyJustPressed(Key.ARROW_LEFT)) {
-                entity.get(Player::class).lane = max(-3, entity.get(Player::class).lane - 1)
-            } else if (system.inputHandler.isKeyJustPressed(Key.ARROW_RIGHT)) {
-                entity.get(Player::class).lane = min(3, entity.get(Player::class).lane + 1)
-            }
-
-            val translation = entity.get(Origin::class).origin.translation
-            val position = entity.position.translation
-            val origin = Vector3(translation.x, translation.y, translation.z)
-
-            val lane = entity.get(Player::class).lane.toFloat()
-            entity.position.setTranslate(
-                x = lerp(origin.x + lane, position.x, step = 0.70f),
-                z = lerp(origin.z, position.z, step = 0.70f)
-            )
-            return null
+        if (input.isKeyPressed(Key.ARROW_DOWN)) {
+            val offscreen = entity.offscreen
+            offscreen.speed -= 10f * delta
+            offscreen.speed = maxOf(offscreen.speed, 0f)
+            offscreen.rotation = entity.position.rotation.y
         }
 
-        override fun onExit(entity: Entity) {
-            emitEvents(StopRunning())
+        if (input.isKeyPressed(Key.ARROW_LEFT)) {
+            entity.position.addLocalRotation(y = -180f, delta = delta)
+            entity.get(Player::class).rotation -= 180 * delta
+        } else if (input.isKeyPressed(Key.ARROW_RIGHT)) {
+            entity.position.addLocalRotation(y = 180f, delta = delta)
+            entity.get(Player::class).rotation += 180 * delta
         }
-    }
-
-    override fun initialState(entity: Entity): State {
-        return Idle(this)
     }
 }

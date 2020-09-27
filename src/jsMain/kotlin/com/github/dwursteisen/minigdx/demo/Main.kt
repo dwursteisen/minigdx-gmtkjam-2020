@@ -21,13 +21,13 @@ val loadingProgress = { progress: Percent ->
     val percent = progress.toFloat()
     val tag = document.getElementById("loading")
     val result = if(percent < 0.25f) {
-        "\uD83C\uDD7E\uD83C\uDD7E\uD83C\uDD7E\uD83C\uDD7E"
+        "loading…"
     } else if(percent < 0.5f) {
-        "\uD83C\uDD7E\uD83C\uDD7E❇️❇️"
+        "(still) loading…"
     } else if(percent < 0.75f) {
-        "\uD83C\uDD7E❇️❇️❇️"
+        "almost loaded"
     } else {
-        "❇️❇️❇️❇️"
+        "Loaded!"
     }
     tag?.textContent = result
 }
