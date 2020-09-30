@@ -13,7 +13,7 @@ class MoveSystem : System(EntityQuery(Offscreen::class)) {
         val position = entity.position
 
         // save the previous rotation
-        val previousRotation = position.rotation.copy()
+        val previousRotation = position.quaternion.copy()
         if (!entity.hasComponent(Player::class)) {
             position.setLocalRotation(Quaternion.identity())
                 .addLocalRotation(y = entity.offscreen.rotation, delta = 1f)
