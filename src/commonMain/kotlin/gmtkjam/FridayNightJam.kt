@@ -6,6 +6,7 @@ import com.github.dwursteisen.minigdx.GameContext
 import com.github.dwursteisen.minigdx.ecs.Engine
 import com.github.dwursteisen.minigdx.ecs.createFromNode
 import com.github.dwursteisen.minigdx.ecs.systems.System
+import com.github.dwursteisen.minigdx.file.Sound
 import com.github.dwursteisen.minigdx.game.Screen
 
 
@@ -13,6 +14,8 @@ import com.github.dwursteisen.minigdx.game.Screen
 class FridayNightJam(override val gameContext: GameContext) : Screen {
 
     private val scene: Scene by gameContext.fileHandler.get("asteroid.protobuf")
+
+    private val sound: Sound by gameContext.fileHandler.get("shoot.mp3")
 
     private val log = gameContext.logger
 
@@ -42,7 +45,7 @@ class FridayNightJam(override val gameContext: GameContext) : Screen {
 
     override fun createSystems(engine: Engine): List<System> {
         return listOf(
-            PlayerSystem(gameContext, scene, engine, gameContext.input, shot),
+            PlayerSystem(gameContext, scene, engine, gameContext.input, shot, sound),
             ShotSystem(),
             AsteroidSystem(gameContext, scene, engine, asteroids),
             MoveSystem()

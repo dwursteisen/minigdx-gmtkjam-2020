@@ -10,6 +10,7 @@ import com.github.dwursteisen.minigdx.ecs.entities.Entity
 import com.github.dwursteisen.minigdx.ecs.entities.position
 import com.github.dwursteisen.minigdx.ecs.systems.EntityQuery
 import com.github.dwursteisen.minigdx.ecs.systems.System
+import com.github.dwursteisen.minigdx.file.Sound
 import com.github.dwursteisen.minigdx.input.InputHandler
 import com.github.dwursteisen.minigdx.input.Key
 
@@ -18,7 +19,8 @@ class PlayerSystem(
     private val scene: Scene,
     private val engine: Engine,
     private val input: InputHandler,
-    private val shot: List<Node>
+    private val shot: List<Node>,
+    private val sound: Sound
 ) : System(EntityQuery(Player::class)) {
 
     private var coolDown = 0f
@@ -40,6 +42,7 @@ class PlayerSystem(
             newShot.position.setLocalRotation(x = 0f, y = entity.get(Player::class).rotation, z = 0f)
             newShot.offscreen.rotation = entity.get(Player::class).rotation
             newShot.offscreen.speed = 15f
+            sound.play()
         }
 
         if (input.isKeyPressed(Key.ARROW_UP)) {
